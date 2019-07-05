@@ -1,0 +1,6 @@
+secrets/*
+.idea/
+letsencrypt_work/*
+__pycache__
+kube
+.tox
