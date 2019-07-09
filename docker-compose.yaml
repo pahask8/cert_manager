@@ -1,0 +1,13 @@
+version: '3'
+services:
+  certmanager:
+    container_name: certmanager
+    build: .
+    volumes:
+      - ./letsencrypt_work:/letsencrypt
+      - ./kube:/home/root/.kube
+      - ./secrets:/secrets
+    environment:
+      KUBECONFIG: /home/root/.kube/config
+      DEBUG: True
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/gcp.json

@@ -1,0 +1,43 @@
+replicaCount: 1
+
+image:
+  repository: pahask8/cert_manager_k8s
+  tag: latest
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+resources:
+  limits:
+   cpu: 200m
+   memory: 256Mi
+  requests:
+   cpu: 200m
+   memory: 256Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+persistence:
+  enabled: true
+  path: /letsencrypt
+  subPath: ""
+  accessModes:
+  - ReadWriteOnce
+  size: 1Gi
+  class: standard
+
+extraEnvs:
+  - name: GOOGLE_APPLICATION_CREDENTIALS
+    value: /secrets/gcp.json
+  - name: LETSENCRYPT_DIR
+    value: /letsencrypt
+  - name: LOCAL_K8S
+    value: "True"
+  - name: DEBUG
+    value: "True"

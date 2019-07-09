@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: certificate-controller
+  namespace: default
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: certificate-controller
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch", "update", "patch", "create", "delete"]
+
+- apiGroups: ["development.io"]
+  resources: ["certificates"]
+  verbs: ["get", "list", "watch", "update", "patch", "create", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: certificate-controller
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: certificate-controller
+subjects:
+- kind: ServiceAccount
+  name: certificate-controller
+  namespace: default
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: certificate-controller
+  namespace: default
+  labels:
+    app: certificate-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: certificate-controller
+  template:
+    metadata:
+      labels:
+        app: certificate-controller
+    spec:
+      serviceAccount: certificate-controller
+      serviceAccountName: certificate-controller
+      containers:
+      - name: certificate-controller
+        image: ci-artifacts.devops.fds.com/emlp/certificate-controller:latest
+        imagePullPolicy: Always
+        env:
+        - name: FORCE_UPDATE
+          value: "True"

@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cert-manager.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "cert-manager.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "cert-manager.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "cert-manager.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      serviceAccount: {{ include "cert-manager.fullname" . }}
+      serviceAccountName: {{ include "cert-manager.fullname" . }}
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: gcp
+            mountPath: /secrets
+          {{- if .Values.persistence.enabled }}
+          - name: letsencrypt
+            mountPath: {{ .Values.persistence.path }}
+            subPath: {{ .Values.persistence.subPath }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      volumes:
+      - name: gcp
+        secret:
+          secretName: {{ include "cert-manager.fullname" . }}
+    {{- if .Values.persistence.enabled }}
+      - name: letsencrypt
+        persistentVolumeClaim:
+          claimName: {{ include "cert-manager.fullname" . }}
+    {{- end }}

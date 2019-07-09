@@ -1,0 +1,11 @@
+---
+apiVersion: development.io/v1alpha1
+kind: Certificate
+metadata:
+  name: pavelt
+spec:
+  domain: "*.example.com"
+  email: "test@test.com"  # Email used for registration and recovery contact. Use comma to register multiple emails
+  staging: "True"  # Use the staging server to obtain or revoke test (invalid) certificates; equivalent to --server https://acme-staging-v02.api.letsencrypt.org/directory
+  debug: "True"  # Show tracebacks in case of errors, and allow certbot- auto execution on experimental platforms
+  dry_run: "True"  # Perform a test run of the client, obtaining test (invalid) certificates but not saving them to disk
